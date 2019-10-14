@@ -1,0 +1,48 @@
+1. 在src下的applicationContext.xml中开启组件扫描的标签
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		   xmlns:context="http://www.springframework.org/schema/context"
+		   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		                       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		                       http://www.springframework.org/schema/context
+		                       http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+	
+		<!-- ====================4.自动扫描 ======================================================= -->
+		<!-- 
+			自动扫描：自动扫描所有使用 @Component, @Repository（修饰dao）, @Service（修饰service）, 与 @Controller（修饰controller）注解修饰的类
+		 -->
+		<context:component-scan base-package="spring"></context:component-scan>
+		
+	</beans>
+
+2.在所有需要被管理到IOC容器中的类使用 @Component, @Repository（修饰dao）, @Service（修饰service）, 与 @Controller（修饰controller）等注解修饰
+   //---------------------------------UserDaoImpl.java-----------------------------------
+   @Repository("userDao")//相当于IUserDao userDao = new UserDaoImpl();
+   public class UserDaoImpl implements IUserDao { }
+  
+   //---------------------------------UserDaoImpl_2.java-----------------------------------
+   @Repository("userDao2")//相当于IUserDao userDao2 = new UserDaoImpl_2();
+   public class UserDaoImpl_2 implements IUserDao { }
+ 
+   //---------------------------------UserService.java-----------------------------------
+   @Service("userService")//相当于UserService userService = new UserService();
+   public class UserService {
+
+		@Resource(name="userDao")
+		private IUserDao userDao;
+	
+	}
+	
+3.测试
+	//1.加载并且解析applicationContext.xml
+	//积极加载，在加载与解析xml的同时，即完成所有bean的实例化
+	ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext("applicationContext.xml");
+	
+	System.out.println("----------IOC容器加载完成--------------------");
+	
+	//2.获取工厂中的UserServicw对象了
+	UserService userService = (UserService)factory.getBean("userService"); 
+	
+	//3.调用方法
+	userService.findUsers();
